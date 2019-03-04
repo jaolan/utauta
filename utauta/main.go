@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 //Artist model
@@ -20,14 +19,14 @@ type Artist struct {
 
 //Album model
 type Album struct {
-	AlbumID	string         `json:"album_id"`
+	AlbumID	string      `json:"album_id"`
 	Name	string 	    `json:"name"`
-	Year 	time.Time   `json:"description"`
+	Year 	int   		`json:"year"`
 	Picture	string 	    `json:picture`
 	Artist		   	    `json:artist_id`
 }
 
-//init books var as slice artist struct
+//init artist var as slice artist struct
 var artists []Artist
 
 //get all artists
@@ -99,6 +98,78 @@ func  deleteArtist(w http.ResponseWriter, r *http.Request)  {
 }
 
 
+//Album CRUD operations
+//init album var as slice album struct
+var albums []Album
+
+//get all albums
+func  getAlbums(w http.ResponseWriter, r *http.Request)  {
+	//setting header of content to type json instead of plaintext
+	w.Header().Set("Content-Type", "application/json")
+	//sending the test struct to json encoder
+	json.NewEncoder(w).Encode(albums)
+}
+
+//get one album
+func  getAlbum(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
+	//get the params
+	params := mux.Vars(r)
+	for _, item := range albums{
+		if item.AlbumID == params["album_id"]{
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(&Album{})
+}
+
+//create one album
+func  createAlbums(w http.ResponseWriter, r *http.Request)  {
+	//setting header of content to type json instead of plaintext
+	w.Header().Set("Content-Type", "application/json")
+	var album Album
+	_ = json.NewDecoder(r.Body).Decode(&album)
+	//@todo for example ONLY, MOCK ID
+	album.AlbumID = strconv.Itoa(rand.Intn(30))
+	albums = append(albums,album)
+	json.NewEncoder(w).Encode(album)
+}
+
+//update an album
+func  updateAlbum(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range albums{
+		//checks for album_id, uses slices to remove an album via append
+		if item.AlbumID == params["album_id"] {
+			albums = append(albums[:index],  albums[index+1:]...)
+			var album Album
+			_ = json.NewDecoder(r.Body).Decode(&album)
+			//@todo for example ONLY, MOCK ID
+			album.AlbumID = params["album_id"]
+			albums = append(albums,album)
+			json.NewEncoder(w).Encode(album)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(albums)
+}
+
+//remove an album
+func  deleteAlbum(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range albums{
+		//checks for album_id, uses slices to remove an album via append
+		if item.AlbumID == params["album_id"] {
+			albums = append(albums[:index],  albums[index+1:]...)
+			break
+		}
+	}
+	json.NewEncoder(w).Encode(albums)
+}
+
 func main(){
 	//init mux router
 	r:= mux.NewRouter()
@@ -107,6 +178,9 @@ func main(){
 	artists = append(artists, Artist{ArtistID: "1", Name:"frank", Desc:"frank makes jpop.", Picture:"http://www.trueactivist.com/wp-content/uploads/2015/07/hotdog-1024x768.jpg"})
 	artists = append(artists, Artist{ArtistID: "2", Name:"まゆこ", Desc:"J-POPが好きです", Picture:"https://aprilrose0404.files.wordpress.com/2010/10/onigiri-1.jpg"})
 
+	//testing data for Albums
+	albums = append(albums, Album{AlbumID: "1", Name:"franks album", Year:1982, Picture:"http://www.trueactivist.com/wp-content/uploads/2015/07/hotdog-1024x768.jpg"})
+	albums = append(albums, Album{AlbumID: "2", Name:"まゆこ", Year:1990, Picture:"https://aprilrose0404.files.wordpress.com/2010/10/onigiri-1.jpg"})
 
 	// Route handlers / Endpts
 	r.HandleFunc("/artists", getArtists).Methods("GET")
@@ -115,8 +189,14 @@ func main(){
 	r.HandleFunc("/artists/{artist_id}", updateArtist).Methods("PUT")
 	r.HandleFunc("/artists/{artist_id}", deleteArtist).Methods("DELETE")
 
+	// Route handlers / Endpts for Albums
+	r.HandleFunc("/albums", getAlbums).Methods("GET")
+	r.HandleFunc("/albums/{album_id}", getAlbum).Methods("GET")
+	r.HandleFunc("/albums", createAlbums).Methods("POST")
+	r.HandleFunc("/albums/{album_id}", updateAlbum).Methods("PUT")
+	r.HandleFunc("/albums/{album_id}", deleteAlbum).Methods("DELETE")
+
 	//listens on port, log.fatal throws err if something fails
 	log.Fatal(http.ListenAndServe(":8000", r))
-
 
 }
