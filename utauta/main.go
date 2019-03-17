@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
 	"log"
 	"math/rand"
 	"net/http"
@@ -197,6 +198,6 @@ func main(){
 	r.HandleFunc("/albums/{album_id}", deleteAlbum).Methods("DELETE")
 
 	//listens on port, log.fatal throws err if something fails
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(":9000",  handlers.CORS()(r)))
 
 }
