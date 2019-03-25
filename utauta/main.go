@@ -197,6 +197,14 @@ func main(){
 	r.HandleFunc("/albums/{album_id}", updateAlbum).Methods("PUT")
 	r.HandleFunc("/albums/{album_id}", deleteAlbum).Methods("DELETE")
 
+	//todo implement matching with artist foreign key
+	//Route handlers / Endpts for an artists' albums
+	r.HandleFunc("/artists/{artist_id}/albums", getAlbums).Methods("GET")
+	r.HandleFunc("/artists/{artist_id}/{album_id}", getAlbum).Methods("GET")
+	r.HandleFunc("/artists/{artist_id}/albums", createAlbums).Methods("POST")
+	r.HandleFunc("/artists/{artist_id}/{album_id}", updateAlbum).Methods("PUT")
+	r.HandleFunc("/artists/{artist_id}/{album_id}", deleteAlbum).Methods("DELETE")
+
 	//listens on port, log.fatal throws err if something fails
 	log.Fatal(http.ListenAndServe(":9000",  handlers.CORS()(r)))
 
