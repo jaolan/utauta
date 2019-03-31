@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
+	"github.com/jinzhu/gorm"
 	"log"
 	"math/rand"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 //Artist model
 type Artist struct {
+	gorm.Model
 	ArtistID string		`json:"artist_id"`
 	Name	 string 	`json:"name"`
 	Desc	 string 	`json:"description"`
@@ -20,11 +22,14 @@ type Artist struct {
 
 //Album model
 type Album struct {
+	gorm.Model
 	AlbumID	string      `json:"album_id"`
 	Name	string 	    `json:"name"`
 	Year 	int   		`json:"year"`
 	Picture	string 	    `json:picture`
 	Artist		   	    `json:artist_id`
+	//each Album belongs to an Artists, GORM auto links w artistID using the below:
+	//Artist Artist `gorm:"association_foreignkey:Refer"` // use Refer as association foreign key
 }
 
 //init artist var as slice artist struct
