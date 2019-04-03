@@ -14,7 +14,8 @@ import (
 //Artist model
 type Artist struct {
 	gorm.Model
-	ArtistID string		`json:"artist_id"`
+	//The Artist ID will be the tables PK
+	ArtistID string 	`json:"artist_id" gorm:"primary_key" `
 	Name	 string 	`json:"name"`
 	Desc	 string 	`json:"description"`
 	Picture	 string 	`json:picture`
@@ -23,11 +24,12 @@ type Artist struct {
 //Album model
 type Album struct {
 	gorm.Model
-	AlbumID	string      `json:"album_id"`
+	//The Album ID will be the tables PK
+	AlbumID	string      `json:"album_id" gorm:"primary_key"`
 	Name	string 	    `json:"name"`
 	Year 	int   		`json:"year"`
 	Picture	string 	    `json:picture`
-	Artist		   	    `json:artist_id`
+	Artist	Artist	   	`json:"artist_id" gorm:"association_foreignkey:Refer"`
 	//each Album belongs to an Artists, GORM auto links w artistID using the below:
 	//Artist Artist `gorm:"association_foreignkey:Refer"` // use Refer as association foreign key
 }
